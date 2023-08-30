@@ -47,7 +47,6 @@ export class AuthService {
     });
 
     if (emailTaken) {
-      console.log(emailTaken);
       throw new ConflictException('This email is already in use');
     }
 
