@@ -10,6 +10,7 @@ import {
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ActiveUserId } from 'src/shared/decorators/ActiveUserId';
 
 @Controller('categories')
 export class CategoriesController {
@@ -21,8 +22,8 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(@ActiveUserId() userId: string) {
+    return this.categoriesService.findAllByUserId(userId);
   }
 
   @Get(':id')
