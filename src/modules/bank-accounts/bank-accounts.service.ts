@@ -4,8 +4,8 @@ import { UpdateBankAccountDto } from './dto/update-bank-account.dto';
 
 @Injectable()
 export class BankAccountsService {
-  create(createBankAccountDto: CreateBankAccountDto) {
-    return 'This action adds a new bankAccount';
+  create(userId: string, createBankAccountDto: CreateBankAccountDto) {
+    return { userId, createBankAccountDto };
   }
 
   findAll() {
