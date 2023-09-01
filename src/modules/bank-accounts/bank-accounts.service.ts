@@ -34,13 +34,7 @@ export class BankAccountsService {
     bankAccountId: string,
     updateBankAccountDto: UpdateBankAccountDto,
   ) {
-    const isOwner = await this.bankAccountRepo.findFirst({
-      where: { id: bankAccountId, userId },
-    });
-
-    if (!isOwner) {
-      throw new NotFoundException('Bank account not found');
-    }
+    await this.validateBankAccountOwnership(userId, bankAccountId);
 
     const { color, initialBalance, name, type } = updateBankAccountDto;
 
@@ -50,7 +44,24 @@ export class BankAccountsService {
     });
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} bankAccount`;
+  async remove(userId: string, bankAccountId: string) {
+    await this.validateBankAccountOwnership(userId, bankAccountId);
+
+    await this.bankAccountRepo.delete({
+      where: { id: bankAccountId },
+    });
+  }
+
+  private async validateBankAccountOwnership(
+    userId: string,
+    bankAccountId: string,
+  ) {
+    const isOwner = await this.bankAccountRepo.findFirst({
+      where: { id: bankAccountId, userId },
+    });
+
+    if (!isOwner) {
+      throw new NotFoundException('Bank account not found');
+    }
   }
 }
