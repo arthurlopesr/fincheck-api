@@ -21,12 +21,12 @@ export class BankAccountsService {
     });
   }
 
-  findAll() {
-    return `This action returns all bankAccounts`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} bankAccount`;
+  findAllByUserId(userId: string) {
+    return this.bankAccountRepo.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 
   update(id: number, updateBankAccountDto: UpdateBankAccountDto) {
