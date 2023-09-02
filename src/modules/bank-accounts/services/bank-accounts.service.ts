@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateBankAccountDto } from './dto/create-bank-account.dto';
-import { UpdateBankAccountDto } from './dto/update-bank-account.dto';
+import { Injectable } from '@nestjs/common';
+import { CreateBankAccountDto } from '../dto/create-bank-account.dto';
+import { UpdateBankAccountDto } from '../dto/update-bank-account.dto';
 import { BankAccountsRepository } from 'src/shared/database/repositories/bank-accounts.respositories';
+import { ValidateBankAccountOwnershipService } from './validate-bank-account-ownership.service';
 
 @Injectable()
 export class BankAccountsService {
-  constructor(private readonly bankAccountRepo: BankAccountsRepository) {}
+  constructor(
+    private readonly bankAccountRepo: BankAccountsRepository,
+    private readonly validateBankAccountOwnershipService: ValidateBankAccountOwnershipService,
+  ) {}
 
   create(userId: string, createBankAccountDto: CreateBankAccountDto) {
     const { color, initialBalance, name, type } = createBankAccountDto;
@@ -34,7 +38,7 @@ export class BankAccountsService {
     bankAccountId: string,
     updateBankAccountDto: UpdateBankAccountDto,
   ) {
-    await this.validateBankAccountOwnership(userId, bankAccountId);
+    this.validateBankAccountOwnershipService.validate(userId, bankAccountId);
 
     const { color, initialBalance, name, type } = updateBankAccountDto;
 
@@ -45,23 +49,13 @@ export class BankAccountsService {
   }
 
   async remove(userId: string, bankAccountId: string) {
-    await this.validateBankAccountOwnership(userId, bankAccountId);
+    await this.validateBankAccountOwnershipService.validate(
+      userId,
+      bankAccountId,
+    );
 
     await this.bankAccountRepo.delete({
       where: { id: bankAccountId },
     });
-  }
-
-  private async validateBankAccountOwnership(
-    userId: string,
-    bankAccountId: string,
-  ) {
-    const isOwner = await this.bankAccountRepo.findFirst({
-      where: { id: bankAccountId, userId },
-    });
-
-    if (!isOwner) {
-      throw new NotFoundException('Bank account not found');
-    }
   }
 }
