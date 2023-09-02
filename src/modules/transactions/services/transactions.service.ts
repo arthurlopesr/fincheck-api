@@ -45,9 +45,19 @@ export class TransactionsService {
     transactionId: string,
     updateTransactionDto: UpdateTransactionDto,
   ) {
-    const { bankAccountId, categoryId } = updateTransactionDto;
-    await this.validateEntitiesOwnership({ userId, bankAccountId, categoryId });
-    return `This action updates a #${transactionId} transaction`;
+    const { bankAccountId, categoryId, date, name, type, value } =
+      updateTransactionDto;
+    await this.validateEntitiesOwnership({
+      userId,
+      bankAccountId,
+      categoryId,
+      transactionId,
+    });
+
+    return this.transactionsRepo.update({
+      where: { id: transactionId },
+      data: { bankAccountId, categoryId, date, name, type, value },
+    });
   }
 
   remove(id: number) {
@@ -58,6 +68,7 @@ export class TransactionsService {
     userId,
     bankAccountId,
     categoryId,
+    transactionId,
   }: {
     userId: string;
     bankAccountId: string;
@@ -65,6 +76,11 @@ export class TransactionsService {
     transactionId?: string;
   }) {
     await Promise.all([
+      transactionId &&
+        this.validateTransactionOwnershipService.validate(
+          userId,
+          transactionId,
+        ),
       this.validateBankAccountOwnershipService.validate(userId, bankAccountId),
       this.validateCategoryOwnershipService.validate(userId, categoryId),
     ]);
